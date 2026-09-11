@@ -1,6 +1,6 @@
 import { useState } from "react"
 import { Search, Heart, ShoppingBag, User, Menu, X, Handshake, Compass } from "lucide-react"
-import { Link } from "@tanstack/react-router"
+import { Link } from "react-router-dom"
 /**
  * Navbar — Kori (করি) marketplace
  *

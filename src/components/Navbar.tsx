@@ -1,6 +1,6 @@
 import { useState } from "react"
 import { Search, Heart, ShoppingBag, User, Menu, X, Handshake, Compass } from "lucide-react"
-
+import { Link } from "@tanstack/react-router"
 /**
  * Navbar — Kori (করি) marketplace
  *
@@ -14,11 +14,11 @@ interface NavbarProps {
 }
 
 const CATEGORIES: { label: string; href: string }[] = [
-    { label: "Jamdani", href: "#jamdani" },
-    { label: "Nakshi Kantha", href: "#nakshi-kantha" },
-    { label: "Pottery", href: "#pottery" },
-    { label: "Shital Pati", href: "#shital-pati" },
-    { label: "Bamboo", href: "#bamboo" }
+    { label: "Jamdani", href: "/jamdani" },
+    { label: "Nakshi Kantha", href: "/nakshi-kantha" },
+    { label: "Pottery", href: "/pottery" },
+    { label: "Shital Pati", href: "/shital-pati" },
+    { label: "Bamboo", href: "/bamboo" }
 ]
 
 const DISTRICTS: string[] = ["All Bangladesh", "Tangail", "Rajshahi", "Jamalpur", "Sylhet", "Sonargaon"]
@@ -136,7 +136,7 @@ export default function Navbar({ cartCount = 2, wishlistCount = 3 }: NavbarProps
             <div className="border-t border-[rgba(212,163,56,0.09)] bg-[#1d1712] hidden sm:block">
                 <div className="max-w-7xl mx-auto px-6 flex items-center gap-8 py-2 overflow-x-auto text-sm">
                     {CATEGORIES.map((cat, i) => (
-                        <a
+                        <Link
                             key={cat.label}
                             href={cat.href}
                             className={
@@ -146,7 +146,7 @@ export default function Navbar({ cartCount = 2, wishlistCount = 3 }: NavbarProps
                             }
                         >
                             {cat.label}
-                        </a>
+                        </Link>
                     ))}
                     <span className="text-[#362c24]">|</span>
                     <a

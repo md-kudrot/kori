@@ -1,37 +1,42 @@
-import { useState } from "react"
-import { Search, Heart, ShoppingBag, User, Menu, X, Handshake, Compass } from "lucide-react"
-import { Link } from "react-router-dom"
-/**
- * Navbar — Kori (করি) marketplace
- *
- * Icons: lucide-react (yarn add lucide-react)
- * Colors: inline Tailwind arbitrary hex values — no config setup needed.
- */
-
-interface NavbarProps {
-    cartCount?: number
-    wishlistCount?: number
-}
+import { useState } from "react";
+import { Search, Heart, ShoppingBag, User, Menu, X, Handshake, Compass, LogOut } from "lucide-react";
+import { Link, useNavigate } from "react-router-dom";
+import toast from "react-hot-toast";
+import { authClient } from "../lib/auth-client";
 
 const CATEGORIES: { label: string; href: string }[] = [
     { label: "Jamdani", href: "/jamdani" },
     { label: "Nakshi Kantha", href: "/nakshi-kantha" },
     { label: "Pottery", href: "/pottery" },
     { label: "Shital Pati", href: "/shital-pati" },
-    { label: "Bamboo", href: "/bamboo" }
-]
+    { label: "Bamboo", href: "/bamboo" },
+];
 
-const DISTRICTS: string[] = ["All Bangladesh", "Tangail", "Rajshahi", "Jamalpur", "Sylhet", "Sonargaon"]
+const DISTRICTS: string[] = ["All Bangladesh", "Tangail", "Rajshahi", "Jamalpur", "Sylhet", "Sonargaon"];
+
+interface NavbarProps {
+    cartCount?: number;
+    wishlistCount?: number;
+}
 
 export default function Navbar({ cartCount = 2, wishlistCount = 3 }: NavbarProps) {
-    const [mobileOpen, setMobileOpen] = useState<boolean>(false)
+    const [mobileOpen, setMobileOpen] = useState<boolean>(false);
+    const navigate = useNavigate();
+    const { data: session } = authClient.useSession();
+    const user = session?.user as { name?: string; email?: string; image?: string; role?: string } | undefined;
+
+    async function handleLogout() {
+        await authClient.signOut();
+        toast.success("Logged out");
+        navigate("/login");
+    }
 
     return (
         <nav className="bg-[#16120e]/95 backdrop-blur-md  border-b border-[rgba(212,163,56,0.18)] shadow-xl">
             <div className="flex items-center justify-between px-4 md:px-6 max-w-7xl mx-auto w-full py-3">
                 {/* Brand */}
                 <div className="flex items-center gap-4">
-                    <a href="/" className="flex items-baseline gap-2 group">
+                    <Link to="/" className="flex items-baseline gap-2 group">
                         <span
                             className="text-2xl font-bold text-[#ff9d7a] tracking-tight"
                             style={{ fontFamily: "Merriweather, serif" }}
@@ -41,7 +46,7 @@ export default function Navbar({ cartCount = 2, wishlistCount = 3 }: NavbarProps
                         <span className="hidden sm:inline-block text-xs font-semibold px-2.5 py-0.5 rounded-full bg-[#2e241b] text-[#e6b445] border border-[#e6b445]/25">
                             হেরিটেজ ক্রাফট
                         </span>
-                    </a>
+                    </Link>
                 </div>
 
                 {/* Search + district (desktop only) */}
@@ -76,17 +81,17 @@ export default function Navbar({ cartCount = 2, wishlistCount = 3 }: NavbarProps
                         বাংলা / EN
                     </button>
 
-                    <a
-                        href="#join-maker"
+                    <Link
+                        to="#join-maker"
                         className="hidden sm:inline-flex items-center gap-1.5 px-3.5 py-1.5 rounded-lg bg-[#241d16] hover:bg-[#2e241b] text-[#fbf7ee] hover:text-[#ff9d7a] transition-all text-sm font-semibold border border-[rgba(212,163,56,0.18)]"
                     >
                         <Handshake size={16} className="text-[#e6b445]" />
                         <span>Join as Maker</span>
-                    </a>
+                    </Link>
 
                     <div className="flex items-center gap-2">
-                        <a
-                            href="#favorites"
+                        <Link
+                            to="#favorites"
                             title="Saved Pieces"
                             className="p-2 text-[#dec0b7] hover:text-[#ff9d7a] rounded-full hover:bg-[#241d16] transition-colors relative"
                         >
@@ -96,10 +101,10 @@ export default function Navbar({ cartCount = 2, wishlistCount = 3 }: NavbarProps
                                     {wishlistCount}
                                 </span>
                             )}
-                        </a>
+                        </Link>
 
-                        <a
-                            href="#cart"
+                        <Link
+                            to="#cart"
                             title="Shopping Bag"
                             className="p-2 text-[#dec0b7] hover:text-[#ff9d7a] rounded-full hover:bg-[#241d16] transition-colors relative"
                         >
@@ -109,15 +114,62 @@ export default function Navbar({ cartCount = 2, wishlistCount = 3 }: NavbarProps
                                     {cartCount}
                                 </span>
                             )}
-                        </a>
+                        </Link>
 
-                        <a
-                            href="#profile"
-                            title="Account"
-                            className="p-1.5 rounded-full border border-[#362c24] hover:border-[#ff9d7a] transition-colors flex items-center justify-center bg-[#241d16]"
-                        >
-                            <User size={18} className="text-[#dec0b7]" />
-                        </a>
+                        {/* Auth-aware area — mirrors idea-vault nav logic */}
+                        {!user ? (
+                            <>
+                                <Link
+                                    to="/login"
+                                    className="hidden sm:inline-flex px-3 py-1.5 text-xs font-semibold text-[#451200] bg-[#ff9d7a] hover:bg-[#e46f45] rounded-lg transition-colors"
+                                >
+                                    Log In
+                                </Link>
+                                <Link
+                                    to="/signup"
+                                    className="hidden sm:inline-flex px-3 py-1.5 text-xs font-semibold text-[#ff9d7a] border border-[#ff9d7a]/50 hover:bg-[#ff9d7a]/10 rounded-lg transition-colors"
+                                >
+                                    Sign Up
+                                </Link>
+                                <Link
+                                    to="/login"
+                                    title="Account"
+                                    className="sm:hidden p-1.5 rounded-full border border-[#362c24] hover:border-[#ff9d7a] transition-colors flex items-center justify-center bg-[#241d16]"
+                                >
+                                    <User size={18} className="text-[#dec0b7]" />
+                                </Link>
+                            </>
+                        ) : (
+                            <div className="flex items-center gap-2">
+                                <Link
+                                    to="/profile"
+                                    title={user.name || user.email}
+                                    className="w-8 h-8 rounded-full border border-[#362c24] hover:border-[#ff9d7a] overflow-hidden flex items-center justify-center bg-[#241d16] text-xs font-bold text-[#ff9d7a]"
+                                >
+                                    {user.image ? (
+                                        <img
+                                            src={user.image}
+                                            alt={user.name || "user"}
+                                            referrerPolicy="no-referrer"
+                                            className="w-full h-full object-cover"
+                                        />
+                                    ) : (
+                                        <span>{(user.name || user.email || "U")[0]?.toUpperCase()}</span>
+                                    )}
+                                </Link>
+                                <span className="hidden lg:inline text-xs text-[#fbf7ee] max-w-[100px] truncate">
+                                    {user.name || user.email}
+                                </span>
+                                <button
+                                    onClick={handleLogout}
+                                    title="Log out"
+                                    className="p-1.5 sm:px-2.5 sm:py-1 text-xs text-[#dec0b7] hover:text-[#ff9d7a] rounded border border-[#362c24] bg-[#241d16] hover:bg-[#2e241b] transition-colors flex items-center gap-1"
+                                >
+                                    <LogOut size={14} />
+                                    <span className="hidden sm:inline">Log Out</span>
+                                </button>
+                            </div>
+                        )}
                     </div>
 
                     {/* Mobile hamburger */}
@@ -138,7 +190,7 @@ export default function Navbar({ cartCount = 2, wishlistCount = 3 }: NavbarProps
                     {CATEGORIES.map((cat, i) => (
                         <Link
                             key={cat.label}
-                            href={cat.href}
+                            to={cat.href}
                             className={
                                 i === 0
                                     ? "text-[#ff9d7a] border-b-2 border-[#ff9d7a] font-semibold py-1 whitespace-nowrap"
@@ -149,13 +201,13 @@ export default function Navbar({ cartCount = 2, wishlistCount = 3 }: NavbarProps
                         </Link>
                     ))}
                     <span className="text-[#362c24]">|</span>
-                    <a
-                        href="#directory"
+                    <Link
+                        to="#directory"
                         className="text-[#e6b445] font-semibold hover:underline flex items-center gap-1 whitespace-nowrap"
                     >
                         <Compass size={14} />
                         <span>64 District Artisan Map</span>
-                    </a>
+                    </Link>
                 </div>
             </div>
 
@@ -182,35 +234,66 @@ export default function Navbar({ cartCount = 2, wishlistCount = 3 }: NavbarProps
 
                     <div className="flex flex-col gap-1">
                         {CATEGORIES.map((cat) => (
-                            <a
+                            <Link
                                 key={cat.label}
-                                href={cat.href}
+                                to={cat.href}
                                 className="py-2 text-sm text-[#dec0b7] hover:text-[#ff9d7a] border-b border-[#362c24] last:border-none"
                                 onClick={() => setMobileOpen(false)}
                             >
                                 {cat.label}
-                            </a>
+                            </Link>
                         ))}
-                        <a
-                            href="#directory"
+                        <Link
+                            to="#directory"
                             className="py-2 text-sm text-[#e6b445] flex items-center gap-1.5"
                             onClick={() => setMobileOpen(false)}
                         >
                             <Compass size={14} />
                             <span>64 District Artisan Map</span>
-                        </a>
+                        </Link>
                     </div>
 
-                    <a
-                        href="#join-maker"
+                    {/* Auth links in mobile drawer */}
+                    {!user ? (
+                        <div className="grid grid-cols-2 gap-2">
+                            <Link
+                                to="/login"
+                                onClick={() => setMobileOpen(false)}
+                                className="flex items-center justify-center px-3.5 py-2.5 rounded-lg bg-[#ff9d7a] text-[#451200] text-sm font-semibold"
+                            >
+                                Log In
+                            </Link>
+                            <Link
+                                to="/signup"
+                                onClick={() => setMobileOpen(false)}
+                                className="flex items-center justify-center px-3.5 py-2.5 rounded-lg border border-[#ff9d7a] text-[#ff9d7a] text-sm font-semibold"
+                            >
+                                Sign Up
+                            </Link>
+                        </div>
+                    ) : (
+                        <button
+                            onClick={() => {
+                                setMobileOpen(false);
+                                handleLogout();
+                            }}
+                            className="flex items-center justify-center gap-1.5 w-full px-3.5 py-2.5 rounded-lg border border-[#ff9d7a]/50 text-[#ff9d7a] text-sm font-semibold"
+                        >
+                            <LogOut size={16} />
+                            <span>Log Out ({user.name || user.email})</span>
+                        </button>
+                    )}
+
+                    <Link
+                        to="#join-maker"
                         className="flex items-center justify-center gap-1.5 w-full px-3.5 py-2.5 rounded-lg bg-[#ff9d7a] text-[#451200] text-sm font-semibold"
                         onClick={() => setMobileOpen(false)}
                     >
                         <Handshake size={16} />
                         <span>Join as Maker</span>
-                    </a>
+                    </Link>
                 </div>
             )}
         </nav>
-    )
+    );
 }

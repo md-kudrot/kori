@@ -1,27 +1,37 @@
-import { useState, FormEvent } from "react"
-import { Mail, Lock, Eye, EyeOff, ArrowRight } from "lucide-react"
+import { useState, type FormEvent } from "react";
+import { Mail, Lock, Eye, EyeOff, ArrowRight } from "lucide-react";
+import { Link, useNavigate, useSearchParams } from "react-router-dom";
+import toast from "react-hot-toast";
+import { authClient } from "../lib/auth-client";
 
-/**
- * Login — Kori (করি) marketplace
- *
- * Icons: lucide-react
- * Colors: inline Tailwind arbitrary hex values — no config setup needed.
- *
- * Wire up `onSubmit` to your actual auth call (Better Auth / your API).
- */
+export default function Login() {
+    const [email, setEmail] = useState<string>("");
+    const [password, setPassword] = useState<string>("");
+    const [showPassword, setShowPassword] = useState<boolean>(false);
+    const navigate = useNavigate();
+    const [searchParams] = useSearchParams();
+    const callbackUrl = searchParams.get("callbackUrl") || "/";
 
-interface LoginProps {
-    onSubmit?: (data: { email: string; password: string }) => void
-}
+    async function handleSubmit(e: FormEvent<HTMLFormElement>) {
+        e.preventDefault();
+        const { data, error } = await authClient.signIn.email({
+            email,
+            password,
+        });
+        if (data) {
+            toast.success("Logged in successfully!");
+            navigate(callbackUrl);
+        }
+        if (error) {
+            toast.error(error.message || "Login failed");
+        }
+    }
 
-export default function Login({ onSubmit }: LoginProps) {
-    const [email, setEmail] = useState<string>("")
-    const [password, setPassword] = useState<string>("")
-    const [showPassword, setShowPassword] = useState<boolean>(false)
-
-    function handleSubmit(e: FormEvent<HTMLFormElement>) {
-        e.preventDefault()
-        onSubmit?.({ email, password })
+    async function handleGoogleSignIn() {
+        await authClient.signIn.social({
+            provider: "google",
+            callbackURL: callbackUrl,
+        });
     }
 
     return (
@@ -29,13 +39,13 @@ export default function Login({ onSubmit }: LoginProps) {
             <div className="w-full max-w-md">
                 {/* Brand */}
                 <div className="text-center mb-8">
-                    <a
-                        href="/"
+                    <Link
+                        to="/"
                         className="text-3xl font-bold text-[#ff9d7a] tracking-tight"
                         style={{ fontFamily: "Merriweather, serif" }}
                     >
                         করি Kori
-                    </a>
+                    </Link>
                     <p className="text-sm text-[#b8aca0] mt-2">Welcome back to Bengal's heritage marketplace</p>
                 </div>
 
@@ -58,7 +68,7 @@ export default function Login({ onSubmit }: LoginProps) {
                                 <Mail size={18} className="text-[#b8aca0] mr-2 shrink-0" />
                                 <input
                                     id="email"
-                                    type="text"
+                                    type="email"
                                     required
                                     value={email}
                                     onChange={(e) => setEmail(e.target.value)}
@@ -74,9 +84,9 @@ export default function Login({ onSubmit }: LoginProps) {
                                 <label htmlFor="password" className="block text-xs text-[#b8aca0]">
                                     Password
                                 </label>
-                                <a href="#forgot-password" className="text-xs text-[#ff9d7a] hover:underline">
+                                <Link to="#forgot-password" className="text-xs text-[#ff9d7a] hover:underline">
                                     Forgot password?
-                                </a>
+                                </Link>
                             </div>
                             <div className="flex items-center bg-[#1d1712] border border-[#362c24] hover:border-[#ff9d7a]/50 rounded-lg px-3 py-2.5 focus-within:border-[#ff9d7a] focus-within:ring-2 focus-within:ring-[#ff9d7a]/20 transition-all">
                                 <Lock size={18} className="text-[#b8aca0] mr-2 shrink-0" />
@@ -120,6 +130,7 @@ export default function Login({ onSubmit }: LoginProps) {
                     {/* Google */}
                     <button
                         type="button"
+                        onClick={handleGoogleSignIn}
                         className="w-full h-11 bg-[#1d1712] border border-[#362c24] hover:border-[#ff9d7a]/50 text-[#fbf7ee] font-semibold text-sm rounded-lg transition-all flex items-center justify-center gap-2"
                     >
                         <svg width="18" height="18" viewBox="0 0 18 18">
@@ -147,11 +158,11 @@ export default function Login({ onSubmit }: LoginProps) {
                 {/* Sign up link */}
                 <p className="text-center text-sm text-[#b8aca0] mt-6">
                     Don't have an account?{" "}
-                    <a href="/signup" className="text-[#ff9d7a] font-semibold hover:underline">
+                    <Link to="/signup" className="text-[#ff9d7a] font-semibold hover:underline">
                         Sign up
-                    </a>
+                    </Link>
                 </p>
             </div>
         </div>
-    )
+    );
 }

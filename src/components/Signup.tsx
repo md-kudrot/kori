@@ -41,7 +41,11 @@ export default function Signup() {
 
     if (data) {
       toast.success("Account created successfully!");
-      navigate("/");
+      if (role === "artisan") {
+        navigate("/artisan");
+      } else {
+        navigate("/");
+      }
     }
     if (authError) {
       const msg = authError.message || "Signup failed";

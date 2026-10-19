@@ -1,5 +1,7 @@
-import { useState } from "react";
-import { ShoppingBasket, Star, Heart, ShoppingCart, ArrowRight, CheckCircle } from "lucide-react";
+import { useState, useEffect } from "react";
+import { Link } from "react-router-dom";
+import { ShoppingBasket, Star, Heart, ShoppingCart, ArrowRight, CheckCircle, Loader2 } from "lucide-react";
+import { fetchProducts } from "../lib/api";
 
 /**
  * ProductGrid — "Trending Handcrafted Pieces" section, Kori marketplace
@@ -110,11 +112,53 @@ function formatBDT(amount: number): string {
 }
 
 export default function ProductGrid({
-  products = PRODUCTS,
+  products: initialProducts,
   onAddToCart,
   onToggleFavorite,
 }: ProductGridProps) {
+  const [backendProducts, setBackendProducts] = useState<Product[]>([]);
+  const [loading, setLoading] = useState<boolean>(!initialProducts);
   const [activeFilter, setActiveFilter] = useState<string>(FILTERS[0]);
+
+  const items = initialProducts ?? (backendProducts.length > 0 ? backendProducts : PRODUCTS);
+
+  useEffect(() => {
+    if (initialProducts) return;
+
+    let isMounted = true;
+    fetchProducts()
+      .then((data) => {
+        if (isMounted && data && data.length > 0) {
+          setBackendProducts(data);
+        }
+      })
+      .catch((err) => {
+        console.warn("Backend not reached, using default catalog:", err);
+      })
+      .finally(() => {
+        if (isMounted) setLoading(false);
+      });
+
+    return () => {
+      isMounted = false;
+    };
+  }, [initialProducts]);
+
+  const filteredItems = items.filter((p) => {
+    if (activeFilter === "GI Certified") {
+      return (
+        p.badge?.toLowerCase().includes("gi") ||
+        p.name?.toLowerCase().includes("jamdani")
+      );
+    }
+    if (activeFilter === "Under ৳3,000") {
+      return p.price < 3000;
+    }
+    if (activeFilter === "Ready to Ship") {
+      return true;
+    }
+    return true;
+  });
 
   return (
     <section className="py-12 md:py-24 max-w-7xl mx-auto px-4 md:px-6">
@@ -149,20 +193,28 @@ export default function ProductGrid({
         </div>
       </div>
 
-      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
-        {products.map((p) => (
+      {loading ? (
+        <div className="py-16 flex flex-col items-center justify-center gap-3 text-[#dec0b7]">
+          <Loader2 size={32} className="animate-spin text-[#ff9d7a]" />
+          <span className="text-sm">Loading artisan craft pieces from Kori backend...</span>
+        </div>
+      ) : (
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
+          {filteredItems.map((p) => (
           <div
             key={p.id}
             className="bg-[#241d16] border border-[rgba(212,163,56,0.18)] rounded-xl overflow-hidden shadow-lg hover:shadow-2xl transition-all flex flex-col justify-between group"
           >
             <div>
               <div className="relative aspect-[4/3] overflow-hidden bg-[#2e241b]">
-                <img
-                  src={p.image}
-                  alt={p.name}
-                  className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"
-                />
-                <div className="absolute top-3 left-3 flex flex-col gap-1.5">
+                <Link to={`/products/${p.id}`} className="block w-full h-full">
+                  <img
+                    src={p.image}
+                    alt={p.name}
+                    className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"
+                  />
+                </Link>
+                <div className="absolute top-3 left-3 flex flex-col gap-1.5 pointer-events-none">
                   <span className="px-2 py-0.5 rounded-full bg-[#e6b445] text-[#1c1206] text-[11px] font-bold flex items-center gap-1 shadow-md">
                     <CheckCircle size={11} />
                     <span>{p.badge}</span>
@@ -171,7 +223,7 @@ export default function ProductGrid({
                 <button
                   onClick={() => onToggleFavorite?.(p.id)}
                   title="Save to favorites"
-                  className="absolute top-3 right-3 w-8 h-8 rounded-full bg-[#120e0a]/80 backdrop-blur-sm border border-[#362c24] flex items-center justify-center text-[#b8aca0] hover:text-[#ff9d7a] transition-colors"
+                  className="absolute top-3 right-3 w-8 h-8 rounded-full bg-[#120e0a]/80 backdrop-blur-sm border border-[#362c24] flex items-center justify-center text-[#b8aca0] hover:text-[#ff9d7a] transition-colors z-10"
                 >
                   <Heart size={16} />
                 </button>
@@ -186,9 +238,11 @@ export default function ProductGrid({
                     <span>({p.reviews})</span>
                   </span>
                 </div>
-                <h3 className="text-lg font-bold text-[#fbf7ee] group-hover:text-[#ff9d7a] transition-colors line-clamp-1">
-                  {p.name}
-                </h3>
+                <Link to={`/products/${p.id}`} className="block">
+                  <h3 className="text-lg font-bold text-[#fbf7ee] group-hover:text-[#ff9d7a] transition-colors line-clamp-1">
+                    {p.name}
+                  </h3>
+                </Link>
                 <div className="mt-2 flex items-center gap-2">
                   <span className="text-xs px-2 py-0.5 rounded bg-[#2e241b] text-[#dec0b7]">
                     {p.district}
@@ -215,7 +269,8 @@ export default function ProductGrid({
             </div>
           </div>
         ))}
-      </div>
+        </div>
+      )}
 
       <div className="mt-8 text-center">
         <a

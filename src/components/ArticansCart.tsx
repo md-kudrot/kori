@@ -1,4 +1,6 @@
-import { Stars, ArrowRight, CheckCircle, MapPin, ChevronRight } from "lucide-react"
+import { useState, useEffect } from "react"
+import { Stars, ArrowRight, CheckCircle, MapPin, ChevronRight, Loader2 } from "lucide-react"
+import { fetchArtisans } from "../lib/api"
 
 /**
  * ArtisanCards — "Meet the Artisans" section, Kori marketplace
@@ -60,7 +62,34 @@ const ARTISANS: Artisan[] = [
     }
 ]
 
-export default function ArtisanCards({ artisans = ARTISANS }: ArtisanCardsProps) {
+export default function ArtisanCards({ artisans: initialArtisans }: ArtisanCardsProps) {
+    const [backendArtisans, setBackendArtisans] = useState<Artisan[]>([])
+    const [loading, setLoading] = useState<boolean>(!initialArtisans)
+
+    const items = initialArtisans ?? (backendArtisans.length > 0 ? backendArtisans : ARTISANS)
+
+    useEffect(() => {
+        if (initialArtisans) return
+
+        let isMounted = true
+        fetchArtisans()
+            .then((data) => {
+                if (isMounted && data && data.length > 0) {
+                    setBackendArtisans(data)
+                }
+            })
+            .catch((err) => {
+                console.warn("Backend not reached, using default artisan list:", err)
+            })
+            .finally(() => {
+                if (isMounted) setLoading(false)
+            })
+
+        return () => {
+            isMounted = false
+        }
+    }, [initialArtisans])
+
     return (
         <section className="py-12 md:py-24 bg-[#1d1712] border-y border-[rgba(212,163,56,0.18)]">
             <div className="max-w-7xl mx-auto px-4 md:px-6">
@@ -86,8 +115,14 @@ export default function ArtisanCards({ artisans = ARTISANS }: ArtisanCardsProps)
                     </a>
                 </div>
 
-                <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
-                    {artisans.map((a) => (
+                {loading ? (
+                    <div className="py-12 flex flex-col items-center justify-center gap-3 text-[#dec0b7]">
+                        <Loader2 size={32} className="animate-spin text-[#e6b445]" />
+                        <span className="text-sm">Connecting to artisan directory...</span>
+                    </div>
+                ) : (
+                    <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
+                        {items.map((a) => (
                         <div
                             key={a.id}
                             className="bg-[#241d16] border border-[rgba(212,163,56,0.18)] rounded-xl p-4 flex flex-col justify-between shadow-xl hover:shadow-2xl transition-shadow ring-1 ring-white/5"
@@ -127,7 +162,8 @@ export default function ArtisanCards({ artisans = ARTISANS }: ArtisanCardsProps)
                             </div>
                         </div>
                     ))}
-                </div>
+                    </div>
+                )}
             </div>
         </section>
     )

@@ -1,34 +1,37 @@
-import { useState } from "react";
-import { Search, Heart, ShoppingBag, User, Menu, X, Handshake, Compass, LogOut } from "lucide-react";
-import { Link, useNavigate } from "react-router-dom";
-import toast from "react-hot-toast";
-import { authClient } from "../lib/auth-client";
+import { useState } from "react"
+import { Search, Heart, ShoppingBag, User, Menu, X, Handshake, Compass, LogOut } from "lucide-react"
+import { Link, useNavigate } from "react-router-dom"
+import toast from "react-hot-toast"
+import { authClient } from "../lib/auth-client"
+import { useLocation } from "react-router-dom"
 
 const CATEGORIES: { label: string; href: string }[] = [
     { label: "Jamdani", href: "/jamdani" },
     { label: "Nakshi Kantha", href: "/nakshi-kantha" },
     { label: "Pottery", href: "/pottery" },
     { label: "Shital Pati", href: "/shital-pati" },
-    { label: "Bamboo", href: "/bamboo" },
-];
+    { label: "Bamboo", href: "/bamboo" }
+]
 
-const DISTRICTS: string[] = ["All Bangladesh", "Tangail", "Rajshahi", "Jamalpur", "Sylhet", "Sonargaon"];
+const DISTRICTS: string[] = ["All Bangladesh", "Tangail", "Rajshahi", "Jamalpur", "Sylhet", "Sonargaon"]
 
 interface NavbarProps {
-    cartCount?: number;
-    wishlistCount?: number;
+    cartCount?: number
+    wishlistCount?: number
 }
 
-export default function Navbar({ cartCount = 2, wishlistCount = 3 }: NavbarProps) {
-    const [mobileOpen, setMobileOpen] = useState<boolean>(false);
-    const navigate = useNavigate();
-    const { data: session } = authClient.useSession();
-    const user = session?.user as { name?: string; email?: string; image?: string; role?: string } | undefined;
+export default function Navbar({ cartCount = 1, wishlistCount = 1 }: NavbarProps) {
+    const [mobileOpen, setMobileOpen] = useState<boolean>(false)
+    const navigate = useNavigate()
+    const { data: session } = authClient.useSession()
+    const user = session?.user as { name?: string; email?: string; image?: string; role?: string } | undefined
+    const location = useLocation()
+    const pathName = location.pathname
 
     async function handleLogout() {
-        await authClient.signOut();
-        toast.success("Logged out");
-        navigate("/login");
+        await authClient.signOut()
+        toast.success("Logged out")
+        navigate("/login")
     }
 
     return (
@@ -74,21 +77,6 @@ export default function Navbar({ cartCount = 2, wishlistCount = 3 }: NavbarProps
 
                 {/* Right actions */}
                 <div className="flex items-center gap-3 lg:gap-5">
-                    <button
-                        className="px-2.5 py-1 text-xs text-[#dec0b7] hover:text-[#ff9d7a] rounded border border-[#362c24] bg-[#241d16] hover:bg-[#2e241b] transition-colors"
-                        aria-label="Toggle language"
-                    >
-                        বাংলা / EN
-                    </button>
-
-                    <Link
-                        to="#join-maker"
-                        className="hidden sm:inline-flex items-center gap-1.5 px-3.5 py-1.5 rounded-lg bg-[#241d16] hover:bg-[#2e241b] text-[#fbf7ee] hover:text-[#ff9d7a] transition-all text-sm font-semibold border border-[rgba(212,163,56,0.18)]"
-                    >
-                        <Handshake size={16} className="text-[#e6b445]" />
-                        <span>Join as Maker</span>
-                    </Link>
-
                     <div className="flex items-center gap-2">
                         <Link
                             to="#favorites"
@@ -186,29 +174,31 @@ export default function Navbar({ cartCount = 2, wishlistCount = 3 }: NavbarProps
 
             {/* Category sub-bar (desktop) */}
             <div className="border-t border-[rgba(212,163,56,0.09)] bg-[#1d1712] hidden sm:block">
-                <div className="max-w-7xl mx-auto px-6 flex items-center gap-8 py-2 overflow-x-auto text-sm">
-                    {CATEGORIES.map((cat, i) => (
+                {pathName !== "/profile" && (
+                    <div className="max-w-7xl mx-auto px-6 flex items-center gap-8 py-2 overflow-x-auto text-sm">
+                        {CATEGORIES.map((cat, i) => (
+                            <Link
+                                key={cat.label}
+                                to={cat.href}
+                                className={
+                                    i === 0
+                                        ? "text-[#ff9d7a] border-b-2 border-[#ff9d7a] font-semibold py-1 whitespace-nowrap"
+                                        : "text-[#dec0b7] font-semibold hover:text-[#ff9d7a] py-1 transition-colors whitespace-nowrap"
+                                }
+                            >
+                                {cat.label}
+                            </Link>
+                        ))}
+                        <span className="text-[#362c24]">|</span>
                         <Link
-                            key={cat.label}
-                            to={cat.href}
-                            className={
-                                i === 0
-                                    ? "text-[#ff9d7a] border-b-2 border-[#ff9d7a] font-semibold py-1 whitespace-nowrap"
-                                    : "text-[#dec0b7] font-semibold hover:text-[#ff9d7a] py-1 transition-colors whitespace-nowrap"
-                            }
+                            to="#directory"
+                            className="text-[#e6b445] font-semibold hover:underline flex items-center gap-1 whitespace-nowrap"
                         >
-                            {cat.label}
+                            <Compass size={14} />
+                            <span>64 District Artisan Map</span>
                         </Link>
-                    ))}
-                    <span className="text-[#362c24]">|</span>
-                    <Link
-                        to="#directory"
-                        className="text-[#e6b445] font-semibold hover:underline flex items-center gap-1 whitespace-nowrap"
-                    >
-                        <Compass size={14} />
-                        <span>64 District Artisan Map</span>
-                    </Link>
-                </div>
+                    </div>
+                )}
             </div>
 
             {/* Mobile menu panel */}
@@ -274,8 +264,8 @@ export default function Navbar({ cartCount = 2, wishlistCount = 3 }: NavbarProps
                     ) : (
                         <button
                             onClick={() => {
-                                setMobileOpen(false);
-                                handleLogout();
+                                setMobileOpen(false)
+                                handleLogout()
                             }}
                             className="flex items-center justify-center gap-1.5 w-full px-3.5 py-2.5 rounded-lg border border-[#ff9d7a]/50 text-[#ff9d7a] text-sm font-semibold"
                         >
@@ -295,5 +285,6 @@ export default function Navbar({ cartCount = 2, wishlistCount = 3 }: NavbarProps
                 </div>
             )}
         </nav>
-    );
+    )
 }
+

@@ -20,7 +20,12 @@ export default function Login() {
         });
         if (data) {
             toast.success("Logged in successfully!");
-            navigate(callbackUrl);
+            const userRole = data.user?.role || "buyer";
+            if (userRole === "artisan") {
+                navigate("/artisan");
+            } else {
+                navigate(callbackUrl);
+            }
         }
         if (error) {
             toast.error(error.message || "Login failed");

@@ -11,7 +11,7 @@
     },
     "dependencies": {
         "@tailwindcss/vite": "^4.3.3",
-        "better-auth": "^1.7.4",
+        "better-auth": "^1.7.12",
         "cors": "^2.8.6",
         "dotenv": "^17.4.2",
         "express": "^5.2.1",
@@ -43,3 +43,4 @@
         "vite": "^8.2.2"
     }
 }
+

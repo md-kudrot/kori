@@ -7,6 +7,7 @@ export interface ProductsQueryParams {
   district?: string;
   category?: string;
   search?: string;
+  artisanId?: string;
 }
 
 export interface ApiResponse<T> {
@@ -30,6 +31,9 @@ export async function fetchProducts(params?: ProductsQueryParams): Promise<Produ
   if (params?.search) {
     query.set("search", params.search);
   }
+  if (params?.artisanId) {
+    query.set("artisanId", params.artisanId);
+  }
 
   const url = `${API_BASE}/api/products${query.toString() ? `?${query.toString()}` : ""}`;
   const res = await fetch(url);
@@ -38,6 +42,49 @@ export async function fetchProducts(params?: ProductsQueryParams): Promise<Produ
   }
   const json: ApiResponse<Product[]> = await res.json();
   return json.data;
+}
+
+/**
+ * Create a new craft piece (artisan / admin)
+ */
+export async function createProduct(payload: {
+  name: string;
+  category: string;
+  district: string;
+  detail: string;
+  badge: string;
+  price: number;
+  image: string;
+}): Promise<Product> {
+  const res = await fetch(`${API_BASE}/api/products`, {
+    method: "POST",
+    headers: {
+      "Content-Type": "application/json",
+    },
+    credentials: "include",
+    body: JSON.stringify(payload),
+  });
+
+  const json: ApiResponse<Product> = await res.json();
+  if (!res.ok || !json.success) {
+    throw new Error(json.error || `Failed to create product: ${res.statusText}`);
+  }
+  return json.data;
+}
+
+/**
+ * Delete a product by ID (artisan owner / admin)
+ */
+export async function deleteProduct(id: string): Promise<void> {
+  const res = await fetch(`${API_BASE}/api/products/${encodeURIComponent(id)}`, {
+    method: "DELETE",
+    credentials: "include",
+  });
+
+  const json: ApiResponse<unknown> = await res.json();
+  if (!res.ok || !json.success) {
+    throw new Error(json.error || `Failed to delete product: ${res.statusText}`);
+  }
 }
 
 /**

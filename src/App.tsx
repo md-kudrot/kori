@@ -12,6 +12,7 @@ import Login from "./components/Login"
 import Signup from "./components/Signup"
 import Profile from "./components/Profile"
 import ProductDetails from "./components/ProductDetails"
+import ArtisanDashboard from "./components/ArtisanDashboard"
 
 function HomePage() {
     return (
@@ -38,6 +39,7 @@ export default function App() {
                     <Route path="/login" element={<Login />} />
                     <Route path="/signup" element={<Signup />} />
                     <Route path="/profile" element={<Profile />} />
+                    <Route path="/artisan" element={<ArtisanDashboard />} />
                     <Route path="/products/:id" element={<ProductDetails />} />
                 </Routes>
             </main>

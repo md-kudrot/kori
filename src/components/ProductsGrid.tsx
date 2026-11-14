@@ -18,6 +18,8 @@ export interface Product {
   district: string;
   detail: string;
   badge: string;
+  category?: string;
+  artisanId?: string;
   price: number;
   rating: number;
   reviews: number;

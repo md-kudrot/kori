@@ -1,5 +1,5 @@
 import { useState } from "react"
-import { Search, Heart, ShoppingBag, User, Menu, X, Handshake, Compass, LogOut } from "lucide-react"
+import { Search, Heart, ShoppingBag, User, Menu, X, Handshake, Compass, LogOut, Sparkles } from "lucide-react"
 import { Link, useNavigate } from "react-router-dom"
 import toast from "react-hot-toast"
 import { authClient } from "../lib/auth-client"
@@ -129,6 +129,15 @@ export default function Navbar({ cartCount = 1, wishlistCount = 1 }: NavbarProps
                             </>
                         ) : (
                             <div className="flex items-center gap-2">
+                                {(user.role === "artisan" || user.role === "admin") && (
+                                    <Link
+                                        to="/artisan"
+                                        className="hidden sm:inline-flex items-center gap-1 px-2.5 py-1 text-xs font-semibold text-[#451200] bg-[#e6b445] hover:bg-[#d4a338] rounded-lg transition-colors shadow"
+                                    >
+                                        <Sparkles size={13} />
+                                        <span>Artisan Guild</span>
+                                    </Link>
+                                )}
                                 <Link
                                     to="/profile"
                                     title={user.name || user.email}
@@ -262,25 +271,37 @@ export default function Navbar({ cartCount = 1, wishlistCount = 1 }: NavbarProps
                             </Link>
                         </div>
                     ) : (
-                        <button
-                            onClick={() => {
-                                setMobileOpen(false)
-                                handleLogout()
-                            }}
-                            className="flex items-center justify-center gap-1.5 w-full px-3.5 py-2.5 rounded-lg border border-[#ff9d7a]/50 text-[#ff9d7a] text-sm font-semibold"
-                        >
-                            <LogOut size={16} />
-                            <span>Log Out ({user.name || user.email})</span>
-                        </button>
+                        <div className="space-y-2">
+                            {(user.role === "artisan" || user.role === "admin") && (
+                                <Link
+                                    to="/artisan"
+                                    onClick={() => setMobileOpen(false)}
+                                    className="flex items-center justify-center gap-1.5 w-full px-3.5 py-2.5 rounded-lg bg-[#e6b445] text-[#1c1206] text-sm font-semibold"
+                                >
+                                    <Sparkles size={16} />
+                                    <span>Artisan Guild Dashboard</span>
+                                </Link>
+                            )}
+                            <button
+                                onClick={() => {
+                                    setMobileOpen(false)
+                                    handleLogout()
+                                }}
+                                className="flex items-center justify-center gap-1.5 w-full px-3.5 py-2.5 rounded-lg border border-[#ff9d7a]/50 text-[#ff9d7a] text-sm font-semibold"
+                            >
+                                <LogOut size={16} />
+                                <span>Log Out ({user.name || user.email})</span>
+                            </button>
+                        </div>
                     )}
 
                     <Link
-                        to="#join-maker"
+                        to="/artisan"
                         className="flex items-center justify-center gap-1.5 w-full px-3.5 py-2.5 rounded-lg bg-[#ff9d7a] text-[#451200] text-sm font-semibold"
                         onClick={() => setMobileOpen(false)}
                     >
                         <Handshake size={16} />
-                        <span>Join as Maker</span>
+                        <span>Join as Maker (কারিগর)</span>
                     </Link>
                 </div>
             )}

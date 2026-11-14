@@ -3,14 +3,12 @@ import { Link, useNavigate } from "react-router-dom";
 import {
   Package,
   PlusCircle,
-  TrendingUp,
   MapPin,
   Sparkles,
   Trash2,
   ExternalLink,
   Loader2,
   CheckCircle2,
-  AlertCircle,
   X,
   Layers,
   Award,
@@ -94,7 +92,7 @@ export default function ArtisanDashboard() {
       const data = await fetchProducts(user?.id ? { artisanId: user.id } : undefined);
       // If none filtered by artisanId, filter in memory or display list
       const artisanItems = user?.id 
-        ? data.filter((p: any) => p.artisanId === user.id || p.artisan === user.name)
+        ? data.filter((p: Product) => p.artisanId === user.id || p.artisan === user.name)
         : data;
       setProducts(artisanItems.length > 0 ? artisanItems : data);
     } catch (err) {

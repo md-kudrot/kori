@@ -20,7 +20,7 @@ export default function Login() {
         });
         if (data) {
             toast.success("Logged in successfully!");
-            const userRole = data.user?.role || "buyer";
+            const userRole = (data.user as { role?: string })?.role || "buyer";
             if (userRole === "artisan") {
                 navigate("/artisan");
             } else {

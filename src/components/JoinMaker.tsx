@@ -1,4 +1,5 @@
 import { Award, UserCheck, Phone, Zap, CheckCircle2 } from "lucide-react"
+import { Link } from "react-router-dom"
 
 /**
  * JoinMakerBanner — artisan invitation CTA, Kori marketplace
@@ -41,13 +42,13 @@ export default function JoinMakerBanner() {
                             </p>
 
                             <div className="flex flex-wrap items-center gap-4 pt-2">
-                                <a
-                                    href="#artisan-apply"
+                                <Link
+                                    to="/artisan"
                                     className="h-11 px-6 bg-[#ff9d7a] hover:bg-[#e46f45] text-[#451200] font-semibold text-sm rounded-lg transition-all inline-flex items-center gap-2 shadow-lg"
                                 >
                                     <UserCheck size={18} />
                                     <span>Apply as a Verified Maker (কারিগর আবেদন)</span>
-                                </a>
+                                </Link>
                                 <a
                                     href="#guild-inquiries"
                                     className="h-11 px-5 border border-[rgba(212,163,56,0.18)] text-[#fbf7ee] hover:bg-[#2e241b] hover:text-[#ff9d7a] font-semibold text-sm rounded-lg transition-colors inline-flex items-center gap-2"
